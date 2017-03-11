@@ -1,0 +1,35 @@
+{
+  "scripts": {
+    "start": "export NODE_ENV=development && gulp",
+    "build": "export NODE_ENV=production && gulp build"
+  },
+  "babel": {
+    "presets": [
+      "es2015",
+      "stage-2"
+    ],
+    "plugins": [
+    ]
+  },
+  "dependencies": {
+    "vue": "^2.1.10",
+    "vuex": "^2.2.1",
+    "vue-resource": "^1.2.0",
+    "vue-router": "^2.2.1",
+    "bootstrap-vue": "^0.9.5"
+  },
+  "devDependencies": {
+    "babel-core": "^6.0.0",
+    "babel-loader": "^6.0.0",
+    "babel-preset-es2015": "^6.0.0",
+    "babel-preset-stage-0": "^6.1.2",
+    "vue-loader": "^9.0.0",
+    "webpack": "^1.12.2",
+    "webpack-stream": "^3.1.0",
+    "del": "^2.2.0",
+    "gulp": "^3.9.1",
+    "gulp-livereload": "^3.8.1",
+    "gulp-nodemon": "^2.0.6",
+    "gulp-rename": "^1.2.2"
+  }
+}
