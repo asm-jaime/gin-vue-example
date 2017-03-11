@@ -1,0 +1,11 @@
+# folders
+node_modules/
+public/*.js
+public/*.map
+z_buff
+
+# debug
+*.log
+
+# IDE/vim/etc
+.tern-project

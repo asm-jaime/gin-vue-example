@@ -8,4 +8,4 @@ Vue.use(VueResource)
 Vue.http.options.crossOrigin = true
 // Vue.http.options.credentials = true
 
-export const getData = Vue.resource(points.GET_DATA)
+export const getData = Vue.resource(datas.GET_DATA)
