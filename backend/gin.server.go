@@ -13,6 +13,27 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// ========== index.html
+
+// {{{
+
+var index string = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>project</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+</head>
+
+<body>
+  <div id="app"></div>
+  <script src="build.js"></script>
+</body>
+</html>`
+
+// }}}
+
 // ========== addition methods
 
 // random string {{{
@@ -34,6 +55,8 @@ type Data struct {
 	SomeF float64 `form:"somef"`
 	SomeI int     `form:"somei"`
 }
+
+type Dates []Data
 
 // SetRnd set random data to a point// {{{
 func (data *Data) SetRnd() {
@@ -62,6 +85,17 @@ func (datast *DataState) Get(id string) (data Data, ok bool) { // {{{
 
 	data, ok = datast.Dates[id]
 	return data, ok
+} // }}}
+
+func (datast *DataState) GetArray() (dates Dates) { // {{{
+	datast.Lock()
+	defer datast.Unlock()
+
+	for _, data := range datast.Dates {
+		dates = append(dates, data)
+	}
+
+	return dates
 } // }}}
 
 func (datast *DataState) Post(data *Data) { // {{{
@@ -129,20 +163,7 @@ func (config *Config) CheckFiles() (err error) { // {{{
 		}
 
 		// write default index.html
-		_, err = file.WriteString(`
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>some project</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
-</head>
-
-<body>
-  <div id="app"></div>
-  <script src="build.js"></script>
-</body>
-</html>`)
+		_, err = file.WriteString(index)
 		// save changes
 		err = file.Sync()
 		if err != nil {
@@ -174,7 +195,8 @@ func GetDates(c *gin.Context) { // {{{
 	}
 
 	if len(dataState.Dates) > 0 {
-		c.JSON(http.StatusOK, gin.H{"message": "get dates success", "body": dataState})
+		datast := dataState.GetArray()
+		c.JSON(http.StatusOK, gin.H{"message": "get dates success", "body": datast})
 	} else {
 		c.JSON(400, gin.H{"message": "no data on server", "body": nil})
 	}
@@ -267,6 +289,9 @@ func (server *Server) NewEngine(config *Config) { // {{{
 	fmt.Println("Selected static folder: " + config.StaticFolder)
 	fmt.Println("Selected index.html: " + config.IndexFile)
 	fmt.Println("---------------")
+
+	// no route, bad url
+	router.NoRoute(noRoute)
 
 	router.Run(":" + config.Port)
 } // }}}

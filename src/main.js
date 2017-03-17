@@ -7,22 +7,23 @@ import App from './components/app.vue'
 import store from './store.js'
 import PanelDebug from './components/panel.debug.vue'
 
+import PanelData from './components/panel.data.vue'
+import PageDataTable from './components/page-data-table.vue'
+import PageDataMap from './components/page.data.map.vue'
+
 Vue.use(VueRouter)
 Vue.use(BootstrapVue)
-
-const Users = { template: '<div>users</div>' }
-const Bar = { template: '<div>This is Bar {{ $route.params.id }}</div>' }
 
 const router = new VueRouter({
   mode: 'history',
   base: __dirname,
   routes: [
-    {
-      path: '/', component: PanelDebug,
-      children: [
-        {path: '/bar/:id', name: 'bar', component: Bar}
-      ],
-    },
+    {path: '/', component: PanelDebug, children: [
+      {path: 'datamap', component: PageDataMap, children: [
+        {path: ':id', component: PanelData }
+      ]},
+    ]},
+    {path: '/datatable', component: PageDataTable},
   ]
 })
 

@@ -9,7 +9,8 @@ var livereload = require('gulp-livereload');
 var exec = require('child_process').exec;
 
 gulp.task('clean:build', function() {
-  del('./public/js/*')
+  del('./public/build.js')
+  del('./public/build.map')
 })
 
 gulp.task('build', ['clean:build'], function() {

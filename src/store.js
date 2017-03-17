@@ -26,6 +26,7 @@ const actions = {
   [acts.GET_DATA]({
     commit
   }) {
+      console.log('## acts: ');
     api_data.getData.get().then(res => {
       console.log('## res: ', res.data.body);
       commit(muts.SET_DATA, res.data.body);
@@ -35,7 +36,7 @@ const actions = {
 
 // getters are functions
 const getters = {
-  [gets.GET_DATA](state) {
+  [gets.DATA](state) {
     return state.data;
   },
 }
