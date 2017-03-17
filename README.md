@@ -1,5 +1,6 @@
 # easy-vue
 easy vue starter
 
-#### 
-  *  df
+#### start
+  * `npm install`
+  * `npm run start`
