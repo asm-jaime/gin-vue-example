@@ -1,5 +1,5 @@
 # easy-vue
-easy vue starter
+easy vue starter + golang gin backend
 
 #### start
   * `npm install`
