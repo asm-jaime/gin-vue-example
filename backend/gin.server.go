@@ -7,94 +7,75 @@ import (
 	"strings"
 	"sync"
 
-	"math/rand"
-
+	gen "github.com/asm-jaime/gen"
 	"github.com/gin-gonic/contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
-// ========== index.html
+// ========== server
 
-// {{{
+type Config struct {
+	Port         string
+	StaticFolder string
+	IndexFile    string
+}
 
-var index string = `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <title>project</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
-  <link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-</head>
-
-<body>
-  <div id="app"></div>
-  <script src="build.js"></script>
-</body>
-</html>`
-
-// }}}
-
-// ========== addition methods
-
-// random string {{{
-var letterRunes = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-
-func rndStr(n int) string {
-	rndStr := make([]rune, n)
-	for i := range rndStr {
-		rndStr[i] = letterRunes[rand.Intn(len(letterRunes))]
-	}
-	return string(rndStr)
+func (config *Config) SetDefault() { // {{{
+	config.Port = "3000"
+	config.StaticFolder = "../public"
+	config.IndexFile = "../public/index.html"
 } // }}}
 
 // ========== data
 
 type Data struct {
-	Id    string  `form:"id" binding:"required"`
-	Name  string  `form:"name"`
-	SomeF float64 `form:"somef"`
-	SomeI int     `form:"somei"`
+	Id   string `form:"id"`
+	Data string `form:"data"`
 }
-
-type Dates []Data
 
 // SetRnd set random data to a point// {{{
 func (data *Data) SetRnd() {
-	data.Id = rndStr(6)
-	data.Name = rndStr(8)
-	data.SomeF = (rand.Float64() * 5) + 5
-	data.SomeI = (rand.Int() * 5) + 5
+	data.Id = gen.Str(6)
+	data.Data = gen.Str(20)
 } // }}}
 
-// ========== datastate
+// ========== dataState
 
 type DataState struct {
 	Dates map[string]Data
 	sync.RWMutex
 }
 
-func NewDataState() *DataState { // {{{
-	return &DataState{
-		Dates: make(map[string]Data),
-	}
+func NewDataState() (datast *DataState) { // {{{
+	datast = &DataState{Dates: make(map[string]Data)}
+	return datast
 } // }}}
 
-func (datast *DataState) Get(id string) (data Data, ok bool) { // {{{
+func (datast *DataState) SetRnd(num int) { // {{{
 	datast.Lock()
 	defer datast.Unlock()
 
-	data, ok = datast.Dates[id]
-	return data, ok
+	data := new(Data)
+	for i := 0; i < num; i++ {
+		data.SetRnd()
+		datast.Dates[data.Id] = *data
+	}
 } // }}}
 
-func (datast *DataState) GetArray() (dates Dates) { // {{{
+func (datast *DataState) Get(data *Data) (dates []Data) { // {{{
 	datast.Lock()
 	defer datast.Unlock()
 
-	for _, data := range datast.Dates {
-		dates = append(dates, data)
+	if data.Id == "" {
+		for _, data := range datast.Dates {
+			dates = append(dates, data)
+		}
+	} else {
+		gdata, ok := datast.Dates[data.Id]
+		if ok == true {
+			dates = append(dates, gdata)
+		}
 	}
-
 	return dates
 } // }}}
 
@@ -118,156 +99,125 @@ func (datast *DataState) Del(data *Data) { // {{{
 	delete(datast.Dates, data.Id)
 } // }}}
 
-func (datast *DataState) SetRnd(num int) { // {{{
-	datast.Lock()
-	defer datast.Unlock()
+// ========== interface for global vars, what should be set to context
 
-	data := new(Data)
-	for i := 0; i < num; i++ {
-		data.SetRnd()
-		datast.Dates[data.Id] = *data
-	}
+type Vars struct { // {{{
+	dataState DataState
 } // }}}
-
-// ========== server
-
-type Server struct{}
-
-type Config struct {
-	Port         string
-	StaticFolder string
-	IndexFile    string
-}
-
-func (config *Config) SetDefault() { // {{{
-	config.Port = "3000"
-	config.StaticFolder = "./public"
-	config.IndexFile = "./public/index.html"
-} // }}}
-
-func (config *Config) CheckFiles() (err error) { // {{{
-	if _, err := os.Stat(config.IndexFile); os.IsNotExist(err) {
-		fmt.Printf("\nfile: %v does not exist\n", config.IndexFile)
-		// make dir if it does't exist
-		os.MkdirAll(config.StaticFolder, os.ModePerm)
-
-		var file, err = os.Create(config.IndexFile)
-		if err != nil {
-			return err
-		}
-
-		file, err = os.OpenFile(config.IndexFile, os.O_RDWR, 0644)
-		defer file.Close()
-		if err != nil {
-			return err
-		}
-
-		// write default index.html
-		_, err = file.WriteString(index)
-		// save changes
-		err = file.Sync()
-		if err != nil {
-			fmt.Printf("\ncan't write to index.html\n")
-			return err
-		}
-	}
-	return
-} // }}}
-
-// ========== vars
-
-var dataState *DataState
 
 // ========== controller
 
-func GetDates(c *gin.Context) { // {{{
-	var url_request string
-	url_request = c.Request.URL.Query().Get("id")
-
-	if url_request != "" {
-		fmt.Printf("\nget data id: %v\n", url_request)
-		if data, ok := dataState.Get(url_request); ok == true {
-			c.JSON(http.StatusOK, gin.H{"message": "get data on id success", "body": data})
-		} else {
-			c.JSON(400, gin.H{"message": "no data on id in data state", "body": nil})
-		}
+func GetData(c *gin.Context) { // {{{
+	vars, ok := c.Keys["vars"].(*Vars)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": "can't get vars from context", "body": nil})
 		return
 	}
 
-	if len(dataState.Dates) > 0 {
-		datast := dataState.GetArray()
-		c.JSON(http.StatusOK, gin.H{"message": "get dates success", "body": datast})
-	} else {
-		c.JSON(400, gin.H{"message": "no data on server", "body": nil})
+	var req Data
+	err := c.Bind(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error(), "body": nil})
+		return
 	}
+
+	dates := vars.dataState.Get(&req)
+	if len(dates) < 1 {
+		c.JSON(http.StatusNotFound, gin.H{"msg": "no data in state", "body": nil})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"msg": "get data complete", "body": dates})
 } // }}}
 
 func PostData(c *gin.Context) { // {{{
-	var request Data
-	err := c.Bind(&request)
-
-	if err != nil {
-		fmt.Println(err)
-		c.JSON(400, gin.H{"message": "Incorrect data", "body": nil})
+	vars, ok := c.Keys["vars"].(*Vars)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": "can't get vars from context", "body": nil})
 		return
 	}
 
-	dataState.Post(&request)
+	var req Data
+	err := c.Bind(&req)
 
-	c.JSON(http.StatusOK, gin.H{"message": "get dates success", "body": request})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error(), "body": nil})
+		return
+	}
+
+	vars.dataState.Post(&req)
+	c.JSON(http.StatusOK, gin.H{"msg": "get dates success", "body": req})
 } // }}}
 
 func PutData(c *gin.Context) { // {{{
-	var request Data
-	err := c.Bind(&request)
-
-	if err != nil {
-		fmt.Println(err)
-		c.JSON(400, gin.H{"message": "Incorrect data", "body": nil})
+	vars, ok := c.Keys["vars"].(*Vars)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": "can't get vars from context", "body": nil})
 		return
 	}
 
-	dataState.Put(&request)
+	var req Data
+	err := c.Bind(&req)
 
-	c.JSON(http.StatusOK, gin.H{"message": "put dates success", "body": request})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error(), "body": nil})
+		return
+	}
+
+	vars.dataState.Put(&req)
+	c.JSON(http.StatusOK, gin.H{"msg": "put dates success", "body": req})
 } // }}}
 
 func DelData(c *gin.Context) { // {{{
-	var request Data
-	err := c.Bind(&request)
-
-	if err != nil {
-		fmt.Println(err)
-		c.JSON(400, gin.H{"message": "Incorrect data", "body": nil})
+	vars, ok := c.Keys["vars"].(*Vars)
+	if !ok {
+		c.JSON(http.StatusInternalServerError, gin.H{"msg": "can't get vars from context", "body": nil})
 		return
 	}
 
-	dataState.Del(&request)
+	var req Data
+	err := c.Bind(&req)
 
-	c.JSON(http.StatusOK, gin.H{"message": "get dates success", "body": request})
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error(), "body": nil})
+		return
+	}
+
+	vars.dataState.Del(&req)
+
+	c.JSON(http.StatusOK, gin.H{"msg": "get dates success", "body": req})
 } // }}}
 
 // ========== middleware
 
-func noRoute(c *gin.Context) { // {{{
+func middleVars(vars *Vars) gin.HandlerFunc { // {{{
+	return func(c *gin.Context) {
+		c.Set("vars", vars)
+		c.Next()
+	}
+} // }}}
+
+func NoRoute(c *gin.Context) { // {{{
 	path := strings.Split(c.Request.URL.Path, "/")
 	if (path[1] != "") && (path[1] == "api") {
-		c.JSON(http.StatusNotFound, gin.H{"message": "no route"})
+		c.JSON(http.StatusNotFound, gin.H{"msg": "no route", "body": nil})
 	} else {
 		c.HTML(http.StatusOK, "index.html", "")
 	}
 } // }}}
 
-func (server *Server) NewEngine(config *Config) { // {{{
+// ========== router
+
+func NewRouter(vars *Vars, config *Config) *gin.Engine { // {{{
 	router := gin.Default()
 
-	// router
+	// middlewares
 	router.Use(gin.Logger())
 	router.Use(gin.Recovery())
+	router.Use(middleVars(vars))
+	// no route, bad url
+	router.NoRoute(NoRoute)
 
-	// all frontend
-	fmt.Printf("\nstatic folder: %v\n", config.StaticFolder)
-
+	// frontend
 	router.Use(static.Serve("/", static.LocalFile(config.StaticFolder, true)))
 	router.LoadHTMLGlob(config.IndexFile)
 
@@ -276,32 +226,22 @@ func (server *Server) NewEngine(config *Config) { // {{{
 	{
 		data := api.Group("/data")
 		{
-			data.GET("/", GetDates)
+			data.GET("/", GetData)
 			data.POST("/", PostData)
 			data.PUT("/", PutData)
 			data.DELETE("/", DelData)
 		}
 	}
-
-	// server config info
-	fmt.Println("---------------")
-	fmt.Println("Selected port: " + config.Port)
-	fmt.Println("Selected static folder: " + config.StaticFolder)
-	fmt.Println("Selected index.html: " + config.IndexFile)
-	fmt.Println("---------------")
-
-	// no route, bad url
-	router.NoRoute(noRoute)
-
-	router.Run(":" + config.Port)
+	return router
 } // }}}
 
 func startServer(args []string) {
 	// set config
 	config := Config{}
 	config.SetDefault()
-	dataState = NewDataState()
-	dataState.SetRnd(10)
+
+	vars := Vars{dataState: *NewDataState()}
+	vars.dataState.SetRnd(10)
 
 	// custom params
 	if len(args) > 1 { // set custom port
@@ -313,15 +253,22 @@ func startServer(args []string) {
 	if len(args) > 3 { // set custom index file
 		config.IndexFile = args[3]
 	}
-	err := config.CheckFiles()
-	if err != nil {
-		fmt.Printf("\nerror index.html file: %v\n", err)
+
+	if _, err := os.Stat(config.IndexFile); os.IsNotExist(err) {
+		fmt.Printf("\nfile: %v does not exist\n", config.IndexFile)
 		return
 	}
 
-	// start server
-	server := Server{}
-	server.NewEngine(&config)
+	// server config info
+	fmt.Println("---------------")
+	fmt.Println("Selected port: " + config.Port)
+	fmt.Println("Selected static folder: " + config.StaticFolder)
+	fmt.Println("Selected index.html: " + config.IndexFile)
+	fmt.Println("---------------")
+
+	// get and start router
+	router := NewRouter(&vars, &config)
+	router.Run(":" + config.Port)
 }
 
 func main() {
