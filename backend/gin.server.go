@@ -29,8 +29,8 @@ func (config *Config) SetDefault() { // {{{
 // ========== data
 
 type Data struct {
-	Id   string `form:"id"`
-	Data string `form:"data"`
+	Id   string `form:"id" json:"id"`
+	Data string `form:"data" json:"data"`
 }
 
 // SetRnd set random data to a point// {{{

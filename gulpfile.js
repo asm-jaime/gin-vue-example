@@ -30,7 +30,7 @@ gulp.task('watch:build', function() {
 
 // start backend
 gulp.task('server:gin', function(done) {
-  exec('./backend/backend 8081 ./public', function (err, stdout, stderr) {
+  exec('./backend/gin.server 8081 ./public', function (err, stdout, stderr) {
     console.log(stdout);
     console.log(stderr);
     done(err);
