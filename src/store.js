@@ -12,13 +12,18 @@ import * as api_data from './api/api.dates.js'
 Vue.use(Vuex)
 
 const state = {
-  data: [],
+  dates: [],
 }
 
 const mutations = {
-  [muts.SET_DATA](state, data) {
-    console.log('## inside mutations: ', data);
-    state.data.push(data);
+  [muts.SET_DATA](state, dates) {
+    // console.log('## inside mutations: ', data);
+    // const dates = {}
+    // data.forEach((e) => {
+        // dates[e.id] = e;
+      // })
+      // console.log(state.data)
+    state.dates = dates
   },
 }
 
@@ -26,8 +31,8 @@ const actions = {
   [acts.GET_DATA]({
     commit
   }) {
-      console.log('## acts: ');
-    api_data.getData.get().then(res => {
+    console.log('## acts: ');
+    api_data.resData.get().then(res => {
       console.log('## res: ', res.data.body);
       commit(muts.SET_DATA, res.data.body);
     });
@@ -37,7 +42,7 @@ const actions = {
 // getters are functions
 const getters = {
   [gets.DATA](state) {
-    return state.data;
+    return state.dates;
   },
 }
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"net/http"
 	"os"
 	"strings"
@@ -28,16 +29,26 @@ func (config *Config) SetDefault() { // {{{
 
 // ========== data
 
-type Data struct {
-	Id   string `form:"id" json:"id"`
-	Data string `form:"data" json:"data"`
-}
+type (
+	Data struct {
+		Id       string    `form:"id" json:"id"`
+		Data     string    `form:"data" json:"data"`
+		Location GeoObject `form:"location" json:"location"`
+	}
 
-// SetRnd set random data to a point// {{{
+	GeoObject struct {
+		Type        string     `json:"type"`
+		Coordinates [2]float64 `json:"coordinates"`
+	}
+)
+
 func (data *Data) SetRnd() {
 	data.Id = gen.Str(6)
 	data.Data = gen.Str(20)
-} // }}}
+	data.Location.Type = "Point"
+	data.Location.Coordinates[0] = (rand.Float64() * 5) + 5
+	data.Location.Coordinates[1] = (rand.Float64() * 5) + 5
+}
 
 // ========== dataState
 

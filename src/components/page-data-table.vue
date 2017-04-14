@@ -15,12 +15,12 @@
      striped
      hover
      :filter="filter"
-     :items="items"
+     :items="dates"
      :fields="fields"
      :current-page="currentPage"
      :perPage="perPage">
-       <template slot="name" scope="item">
-         {{item.value.first}} {{item.value.last}}
+       <template slot="point" scope="dates">
+         {{data.value.first}} {{item.value.last}}
        </template>
       <template slot="actions" scope="item">
         <b-btn size="sm" @click="details(item.item)">Details</b-btn>
@@ -37,6 +37,9 @@
 </template>
 
 <script>
+  import { mapGetters, mapActions } from 'vuex'
+  import * as gets from '../constants/types.getters.js'
+  import * as acts from '../constants/types.actions.js'
 
   export default {
     data() {
@@ -44,120 +47,38 @@
         docs: {
           component: 'bTable'
         },
-        items: [
+        dates: [
           {
-            isActive: true,
-            age: 40,
-            name: {
-              first: 'Dickerson',
-              last: 'Macdonald'
-            }
+            id: "some1dfGH334",
+            data: "dfsdfgjnfgnFGFNGn45",
+            point: {type: "point", coordinates: [1.00111, 2.49999]},
           },
-          {
-            isActive: false,
-            age: 21,
-            name: {
-              first: 'Larsen',
-              last: 'Shaw'
-            }
-          },
-          {
-            isActive: false,
-            age: 26,
-            state: 'success',
-            name: {
-              first: 'Mitzi',
-              last: 'Navarro'
-            }
-          },
-          {
-            isActive: false,
-            age: 22,
-            name: {
-              first: 'Geneva',
-              last: 'Wilson'
-            }
-          },
-          {
-            isActive: true,
-            age: 38,
-            name: {
-              first: 'Jami',
-              last: 'Carney'
-            }
-          },
-          {
-            isActive: false,
-            age: 27,
-            name: {
-              first: 'Essie',
-              last: 'Dunlap'
-            }
-          },
-          {
-            isActive: true,
-            age: 40,
-            name: {
-              first: 'Dickerson',
-              last: 'Macdonald'
-            }
-          },
-          {
-            isActive: false,
-            age: 21,
-            name: {
-              first: 'Larsen',
-              last: 'Shaw'
-            }
-          },
-          {
-            isActive: false,
-            age: 26,
-            name: {
-              first: 'Mitzi',
-              last: 'Navarro'
-            }
-          },
-          {
-            isActive: false,
-            age: 22,
-            name: {
-              first: 'Geneva',
-              last: 'Wilson'
-            }
-          },
-          {
-            isActive: true,
-            age: 38,
-            name: {
-              first: 'Jami',
-              last: 'Carney'
-            }
-          },
-          {
-            isActive: false,
-            age: 27,
-            name: {
-              first: 'Essie',
-              last: 'Dunlap'
-            }
-          }
         ],
         fields: {
-          name: {label: 'Person Full name', sortable: true},
-          age: {label: 'Person age', sortable: true},
+          id: {label: 'id', sortable: true},
+          data: {label: 'data'},
+          point: {label: 'point'},
           isActive: {label: 'is Active'},
-          actions: {label: 'Actions'}
         },
         currentPage: 1,
         perPage: 5,
         filter: null
       };
     },
+
+    computed: {
+      ...mapGetters([
+        gets.DATA,
+      ]),
+    },
+    mounted: function() {
+    
+    
+    },
     methods: {
-      details(item) {
+      details(data) {
         // eslint-disable-next-line no-alert
-        alert(JSON.stringify(item));
+        alert(JSON.stringify(data));
       }
     }
   }

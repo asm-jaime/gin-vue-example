@@ -1,11 +1,11 @@
 import Vue from 'vue'
 import VueResource from 'vue-resource'
 
-import {API_DATA as datas} from '../constants/paths.api.js'
+import {DATES as api_data} from '../constants/paths.api.js'
 
 Vue.use(VueResource)
 
 Vue.http.options.crossOrigin = true
 // Vue.http.options.credentials = true
 
-export const getData = Vue.resource(datas.GET_DATA)
+export const resData = Vue.resource(api_data.DATA)
