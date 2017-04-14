@@ -1,6 +1,6 @@
 <template>
   <div class="page-datatable">
-    <h1>dfdff</h1>
+    <h1>data table</h1>
     <div class="justify-content-centermy-1 row">
     <b-form-fieldset horizontal label="Rows per page" class="col-6" :label-size="6">
     <b-form-select :options="[{text:5,value:5},{text:10,value:10},{text:15,value:15}]"
@@ -15,12 +15,12 @@
      striped
      hover
      :filter="filter"
-     :items="dates"
+     :items="DATA"
      :fields="fields"
      :current-page="currentPage"
      :perPage="perPage">
-       <template slot="point" scope="dates">
-         {{data.value.first}} {{item.value.last}}
+       <template slot="location" scope="item">
+         lng: {{item.value.coordinates[0]}}, lat: {{item.value.coordinates[1]}}
        </template>
       <template slot="actions" scope="item">
         <b-btn size="sm" @click="details(item.item)">Details</b-btn>
@@ -28,7 +28,7 @@
     </b-table>
     <div class="justify-content-center row my-1">
       <b-pagination size="md"
-       :total-rows="this.items.length"
+       :total-rows="this.DATA.length"
        :per-page="perPage"
        v-model="currentPage"
        />
@@ -47,18 +47,18 @@
         docs: {
           component: 'bTable'
         },
-        dates: [
+        items: [
           {
             id: "some1dfGH334",
             data: "dfsdfgjnfgnFGFNGn45",
-            point: {type: "point", coordinates: [1.00111, 2.49999]},
+            location: {type: "Point", coordinates: [1.00111, 2.49999]},
           },
         ],
         fields: {
-          id: {label: 'id', sortable: true},
-          data: {label: 'data'},
-          point: {label: 'point'},
-          isActive: {label: 'is Active'},
+          id: {label: 'Id', sortable: true},
+          data: {label: 'Data'},
+          location: {label: 'Geo location'},
+          actions: {label: 'Actions'},
         },
         currentPage: 1,
         perPage: 5,
@@ -72,13 +72,15 @@
       ]),
     },
     mounted: function() {
-    
-    
+      this.GET_DATA();
     },
     methods: {
-      details(data) {
+      ...mapActions([
+        acts.GET_DATA,
+      ]),
+      details(item) {
         // eslint-disable-next-line no-alert
-        alert(JSON.stringify(data));
+        alert(JSON.stringify(item));
       }
     }
   }
