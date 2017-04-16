@@ -23,7 +23,8 @@
          lng: {{item.value.coordinates[0]}}, lat: {{item.value.coordinates[1]}}
        </template>
       <template slot="actions" scope="item">
-        <b-btn size="sm" @click="details(item.item)">Details</b-btn>
+        <b-btn size="sm" @click="edit(item.item)"><i class="fa fa-edit"></i></b-btn>
+        <b-btn size="sm" @click="del(item.item)"  v-bind:ref="item.item.id"><i class="fa fa-close"></i></b-btn>
       </template>
     </b-table>
     <div class="justify-content-center row my-1">
@@ -42,46 +43,60 @@
   import * as acts from '../constants/types.actions.js'
 
   export default {
-    data() {
+    data() { // {{{
       return {
         docs: {
           component: 'bTable'
         },
-        items: [
-          {
-            id: "some1dfGH334",
-            data: "dfsdfgjnfgnFGFNGn45",
-            location: {type: "Point", coordinates: [1.00111, 2.49999]},
-          },
-        ],
+        items: [{id:'dfdfdf', data:'dfdfdf', location:{type:'point', coordinates:[1,2]}}],
         fields: {
           id: {label: 'Id', sortable: true},
-          data: {label: 'Data'},
-          location: {label: 'Geo location'},
-          actions: {label: 'Actions'},
+          data: {label: 'Data', sortable: false},
+          location: {label: 'Geo location', sortable: false},
+          actions: {label: 'Actions', sortable: false},
         },
         currentPage: 1,
         perPage: 5,
         filter: null
       };
-    },
-
-    computed: {
+    }, // }}}
+    computed: { // {{{
       ...mapGetters([
         gets.DATA,
       ]),
-    },
-    mounted: function() {
-      this.GET_DATA();
-    },
+    }, // }}}
+    mounted: function() { // {{{
+      this.GET_DATA().then(()=>{
+        //this.items = this.DATA;
+        //console.log('good');
+      })
+    }, // }}}
     methods: {
       ...mapActions([
         acts.GET_DATA,
+        acts.PST_DATA,
+        acts.PUT_DATA,
+        acts.DEL_DATA,
       ]),
-      details(item) {
-        // eslint-disable-next-line no-alert
-        alert(JSON.stringify(item));
-      }
+      del(item) {
+        console.log('delete');
+        try {
+          this.DEL_DATA(item)
+        } catch(err) {
+          this.$refs[item.id].$el.className = this.$refs[item.id].$el.className+' show-blinking';
+          setTimeout(()=>{
+            this.$refs[item.id].$el.className = this.$refs[item.id].classObject.join(' ');
+          }, 1000)
+          console.log(err)
+        }
+      },
+      edit(item) {
+       // try {
+       //   this.DEL_DATA(item)
+       // } catch(err) {
+       //   console.log('bad request')
+       // }
+      },
     }
   }
   </script>
@@ -94,5 +109,10 @@
     float: right;
     z-index: 2;
     background: azure;
+  }
+  .show-blinking {
+    background: #F00;
+    transition-property: background;
+    transition-duration: 0.6s;
   }
   </style>

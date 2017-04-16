@@ -32,13 +32,13 @@ func (config *Config) SetDefault() { // {{{
 type (
 	Data struct {
 		Id       string    `form:"id" json:"id"`
-		Data     string    `form:"data" json:"data"`
-		Location GeoObject `form:"location" json:"location"`
+		Data     string    `form:"data" json:"data,omitempty"`
+		Location GeoObject `form:"location" json:"location,omitempty"`
 	}
 
 	GeoObject struct {
-		Type        string     `json:"type"`
-		Coordinates [2]float64 `json:"coordinates"`
+		Type        string     `json:"type,omitempty"`
+		Coordinates [2]float64 `json:"coordinates,omitempty"`
 	}
 )
 
@@ -178,7 +178,7 @@ func PutData(c *gin.Context) { // {{{
 	c.JSON(http.StatusOK, gin.H{"msg": "put dates success", "body": req})
 } // }}}
 
-func DelData(c *gin.Context) { // {{{
+func DelData(c *gin.Context) {
 	vars, ok := c.Keys["vars"].(*Vars)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": "can't get vars from context", "body": nil})
@@ -195,8 +195,8 @@ func DelData(c *gin.Context) { // {{{
 
 	vars.dataState.Del(&req)
 
-	c.JSON(http.StatusOK, gin.H{"msg": "get dates success", "body": req})
-} // }}}
+	c.JSON(http.StatusOK, gin.H{"msg": "delete data complete", "body": req})
+}
 
 // ========== middleware
 
@@ -240,7 +240,7 @@ func NewRouter(vars *Vars, config *Config) *gin.Engine { // {{{
 			data.GET("/", GetData)
 			data.POST("/", PostData)
 			data.PUT("/", PutData)
-			data.DELETE("/", DelData)
+			data.DELETE("", DelData)
 		}
 	}
 	return router

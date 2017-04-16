@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"sync"
@@ -63,6 +64,7 @@ func TestPost(t *testing.T) { // {{{
 			postData, _ := http.NewRequest("POST", "/api/data/", bytes.NewBuffer(jdata))
 			postData.Header.Set("X-Custom-Header", "myvalue")
 			postData.Header.Set("Content-Type", "application/json")
+			fmt.Println(postData)
 			response := httptest.NewRecorder()
 			router.ServeHTTP(response, postData)
 		}()
