@@ -1,4 +1,14 @@
 {
+  "jest": {
+    "moduleFileExtensions": [
+      "js",
+      "vue"
+    ],
+    "transform": {
+      "^.+\\.js$": "<rootDir>/node_modules/babel-jest",
+      ".*\\.(vue)$": "<rootDir>/node_modules/jest-vue-preprocessor"
+    }
+  },
   "scripts": {
     "start": "export NODE_ENV=development && gulp",
     "build": "export NODE_ENV=production && gulp build",

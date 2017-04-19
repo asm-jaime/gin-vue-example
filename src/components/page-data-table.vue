@@ -83,11 +83,11 @@
         try {
           this.DEL_DATA(item)
         } catch(err) {
+          console.log('some error: ', err)
           this.$refs[item.id].$el.className = this.$refs[item.id].$el.className+' show-blinking';
           setTimeout(()=>{
             this.$refs[item.id].$el.className = this.$refs[item.id].classObject.join(' ');
           }, 1000)
-          console.log(err)
         }
       },
       edit(item) {

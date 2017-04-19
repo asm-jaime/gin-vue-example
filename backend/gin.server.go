@@ -187,6 +187,8 @@ func DelData(c *gin.Context) {
 
 	var req Data
 	err := c.Bind(&req)
+	fmt.Println(req)
+	fmt.Println(c.Request.Body)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error(), "body": nil})

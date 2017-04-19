@@ -25,6 +25,11 @@ const mutations = {
       // console.log(state.data)
     state.dates = dates
   },
+  [muts.DEL_DATA](state, data) {
+    const index = state.dates.findIndex(e => e.id === data.id);
+    state.dates.splice(index, 1);
+    console.log(state.dates);
+  },
 }
 
 const actions = {
@@ -59,12 +64,14 @@ const actions = {
     api_data.resData.remove({}, {id: data.id}).then(res => {
       console.log('##msg: ', res.data.msg)
       if(res.status === 200){
-        console.log('## delete data: ', res);
-      }else{
-        throw new Error(res.data.msg)
+        // console.log('## delete data: ', res);
+        commit(muts.DEL_DATA, data);
+      } else {
+        // throw new Error(res.data.msg)
+        throw new Error('not deleted');
       }
       // commit(muts.DEL_DATA, res.data.body);
-    });
+    })
   },
 }
 
