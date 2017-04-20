@@ -23,8 +23,8 @@
          lng: {{item.value.coordinates[0]}}, lat: {{item.value.coordinates[1]}}
        </template>
       <template slot="actions" scope="item">
-        <b-btn size="sm" @click="edit(item.item)"><i class="fa fa-edit"></i></b-btn>
-        <b-btn size="sm" @click="del(item.item)"  v-bind:ref="item.item.id"><i class="fa fa-close"></i></b-btn>
+        <b-button :variant="success" size="sm" @click="edit(item.item)"><i class="fa fa-edit"></i></b-button>
+        <b-button size="sm" @click="del(item.item)"  v-bind:ref="item.item.id"><i class="fa fa-close"></i></b-button>
       </template>
     </b-table>
     <div class="justify-content-center row my-1">
@@ -34,6 +34,14 @@
        v-model="currentPage"
        />
     </div>
+
+    <!-- Modal Component -->
+    <b-modal id="modal1" title="edit data" @ok="update">
+      <form @submit.stop.prevent="update">
+        <b-form-input type="text" placeholder="Enter your name" v-model="cur_item.id"></b-form-input>
+      </form>
+    </b-modal>
+
   </div>
 </template>
 
@@ -48,6 +56,7 @@
         docs: {
           component: 'bTable'
         },
+        cur_item: {},
         items: [{id:'dfdfdf', data:'dfdfdf', location:{type:'point', coordinates:[1,2]}}],
         fields: {
           id: {label: 'Id', sortable: true},
@@ -78,24 +87,29 @@
         acts.PUT_DATA,
         acts.DEL_DATA,
       ]),
-      del(item) {
-        console.log('delete');
-        try {
-          this.DEL_DATA(item)
-        } catch(err) {
-          console.log('some error: ', err)
-          this.$refs[item.id].$el.className = this.$refs[item.id].$el.className+' show-blinking';
-          setTimeout(()=>{
-            this.$refs[item.id].$el.className = this.$refs[item.id].classObject.join(' ');
-          }, 1000)
-        }
-      },
+      del(item) { // {{{
+        this.DEL_DATA(item)
+          .then((e)=>{
+            console.log('deleted');
+          })
+          .catch(e => {
+            console.log(e);
+            this.$refs[item.id].$el.className = this.$refs[item.id].$el.className+' show-blinking';
+            setTimeout(()=>{
+              this.$refs[item.id].$el.className = this.$refs[item.id].classObject.join(' ');
+            }, 1000);
+          })
+      }, // }}}
       edit(item) {
-       // try {
-       //   this.DEL_DATA(item)
-       // } catch(err) {
-       //   console.log('bad request')
-       // }
+        console.log(item);
+        this.cur_item = item;
+        this.$root.$emit('show::modal','modal1');
+      },
+      update(){
+        console.log('##submit');
+      },
+      show(){
+        console.log('##clear');
       },
     }
   }
@@ -108,7 +122,9 @@
     position: absolute;
     float: right;
     z-index: 2;
-    background: azure;
+  }
+  .modal-data {
+    display: block;
   }
   .show-blinking {
     background: #F00;

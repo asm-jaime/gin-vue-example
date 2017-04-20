@@ -35,7 +35,10 @@ module.exports = {
       query: {
         name: '[name].[ext]?[hash]'
       }
-    }]
+    }, {
+      test: /\.css$/,
+      loader: "style-loader!css-loader"
+    }],
   },
   devtool: '#eval-source-map',
 }

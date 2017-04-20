@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import BootstrapVue from 'bootstrap-vue'
+import 'bootstrap/dist/css/bootstrap.css'
+import 'bootstrap-vue/dist/bootstrap-vue.css'
 
 import App from './components/app.vue'
 
@@ -10,6 +12,8 @@ import PanelDebug from './components/panel.debug.vue'
 import PanelData from './components/panel.data.vue'
 import PageDataTable from './components/page-data-table.vue'
 import PageDataMap from './components/page.data.map.vue'
+
+// require('../node_modules/bootstrap-vue/dist/bootstrap-vue.css')
 
 Vue.use(VueRouter)
 Vue.use(BootstrapVue)

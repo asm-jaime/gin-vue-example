@@ -61,16 +61,12 @@ const actions = {
     commit
   }, data) {
     console.log('data: ', data)
-    api_data.resData.remove({}, {id: data.id}).then(res => {
-      console.log('##msg: ', res.data.msg)
+    return api_data.resData.remove({}, {id: data.id}).then(res => {
       if(res.status === 200){
-        // console.log('## delete data: ', res);
         commit(muts.DEL_DATA, data);
       } else {
-        // throw new Error(res.data.msg)
-        throw new Error('not deleted');
+        throw new Error('can\'t deleted this data');
       }
-      // commit(muts.DEL_DATA, res.data.body);
     })
   },
 }
