@@ -15,13 +15,14 @@ import (
 
 // ========== server
 
+// {{{
 type Config struct {
 	Port         string
 	StaticFolder string
 	IndexFile    string
 }
 
-func (config *Config) SetDefault() { // {{{
+func (config *Config) SetDefault() {
 	config.Port = "3000"
 	config.StaticFolder = "../public"
 	config.IndexFile = "../public/index.html"
@@ -29,9 +30,10 @@ func (config *Config) SetDefault() { // {{{
 
 // ========== data
 
+// {{{
 type (
 	Data struct {
-		Id       string    `form:"id" json:"id"`
+		Id       string    `form:"id" json:"id,omitempty"`
 		Data     string    `form:"data" json:"data,omitempty"`
 		Location GeoObject `form:"location" json:"location,omitempty"`
 	}
@@ -48,7 +50,7 @@ func (data *Data) SetRnd() {
 	data.Location.Type = "Point"
 	data.Location.Coordinates[0] = (rand.Float64() * 5) + 5
 	data.Location.Coordinates[1] = (rand.Float64() * 5) + 5
-}
+} // }}}
 
 // ========== dataState
 
@@ -93,6 +95,7 @@ func (datast *DataState) Get(data *Data) (dates []Data) { // {{{
 func (datast *DataState) Post(data *Data) { // {{{
 	datast.Lock()
 	defer datast.Unlock()
+	data.Id = gen.Str(6)
 	datast.Dates[data.Id] = *data
 } // }}}
 
@@ -140,7 +143,7 @@ func GetData(c *gin.Context) { // {{{
 	c.JSON(http.StatusOK, gin.H{"msg": "get data complete", "body": dates})
 } // }}}
 
-func PostData(c *gin.Context) { // {{{
+func PostData(c *gin.Context) {
 	vars, ok := c.Keys["vars"].(*Vars)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": "can't get vars from context", "body": nil})
@@ -155,9 +158,15 @@ func PostData(c *gin.Context) { // {{{
 		return
 	}
 
+	if req.Data == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"msg": "empty data", "body": nil})
+		return
+	}
+
 	vars.dataState.Post(&req)
+	fmt.Println(req)
 	c.JSON(http.StatusOK, gin.H{"msg": "get dates success", "body": req})
-} // }}}
+}
 
 func PutData(c *gin.Context) { // {{{
 	vars, ok := c.Keys["vars"].(*Vars)
@@ -178,7 +187,7 @@ func PutData(c *gin.Context) { // {{{
 	c.JSON(http.StatusOK, gin.H{"msg": "put dates success", "body": req})
 } // }}}
 
-func DelData(c *gin.Context) {
+func DelData(c *gin.Context) { // {{{
 	vars, ok := c.Keys["vars"].(*Vars)
 	if !ok {
 		c.JSON(http.StatusInternalServerError, gin.H{"msg": "can't get vars from context", "body": nil})
@@ -187,8 +196,6 @@ func DelData(c *gin.Context) {
 
 	var req Data
 	err := c.Bind(&req)
-	fmt.Println(req)
-	fmt.Println(c.Request.Body)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"msg": err.Error(), "body": nil})
@@ -198,7 +205,7 @@ func DelData(c *gin.Context) {
 	vars.dataState.Del(&req)
 
 	c.JSON(http.StatusOK, gin.H{"msg": "delete data complete", "body": req})
-}
+} // }}}
 
 // ========== middleware
 
@@ -239,9 +246,9 @@ func NewRouter(vars *Vars, config *Config) *gin.Engine { // {{{
 	{
 		data := api.Group("/data")
 		{
-			data.GET("/", GetData)
-			data.POST("/", PostData)
-			data.PUT("/", PutData)
+			data.GET("", GetData)
+			data.POST("", PostData)
+			data.PUT("", PutData)
 			data.DELETE("", DelData)
 		}
 	}

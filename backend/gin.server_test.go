@@ -25,7 +25,7 @@ func TestGet(t *testing.T) { // {{{
 	}
 	res := Res{}
 	// start make requests
-	getData, err := http.NewRequest("GET", "/api/data/", nil)
+	getData, err := http.NewRequest("GET", "/api/data", nil)
 	wg := &sync.WaitGroup{}
 	for count := 0; count < nums; count++ {
 		wg.Add(1)
@@ -61,16 +61,17 @@ func TestPost(t *testing.T) { // {{{
 			defer wg.Done()
 			data.SetRnd()
 			jdata, _ := json.Marshal(data)
-			postData, _ := http.NewRequest("POST", "/api/data/", bytes.NewBuffer(jdata))
+			fmt.Println(string(jdata))
+			postData, _ := http.NewRequest("POST", "/api/data", bytes.NewBuffer(jdata))
 			postData.Header.Set("X-Custom-Header", "myvalue")
 			postData.Header.Set("Content-Type", "application/json")
-			fmt.Println(postData)
 			response := httptest.NewRecorder()
 			router.ServeHTTP(response, postData)
 		}()
 	}
 	wg.Wait()
 
+	// fmt.Println(vars.dataState.Dates)
 	if len(vars.dataState.Dates) != nums {
 		t.Error("error, count data does not overlap")
 	}
