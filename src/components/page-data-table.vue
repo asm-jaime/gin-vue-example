@@ -19,16 +19,18 @@
      :fields="fields"
      :current-page="currentPage"
      :perPage="perPage">
+       <template scope="item" style="color: red;">
+       </template>
        <template slot="location" scope="item">
          lng: {{item.value.coordinates[0]}}, lat: {{item.value.coordinates[1]}}
        </template>
       <template slot="actions" scope="item">
-				<b-button :variant="success" size="sm" @click="open_edit(item.item)"><i class="fa fa-edit"></i></b-button>
+        <b-button :variant="success" size="sm" @click="open_edit(item.item)"><i class="fa fa-edit"></i></b-button>
         <b-button size="sm" @click="del(item.item)"  v-bind:ref="item.item.id"><i class="fa fa-close"></i></b-button>
       </template>
     </b-table>
-		<div class="row justify-content-end" style="padding-right: 41px;">
-			<b-button ref="addData" @click="open_add" style="width: 64px;"><i class="fa fa-plus"></i></b-button>
+    <div class="row justify-content-end" style="padding-right: 41px;">
+      <b-button ref="addData" @click="open_add" style="width: 64px;"><i class="fa fa-plus"></i></b-button>
     </div>
     <div class="justify-content-center row my-1">
       <b-pagination size="md"
@@ -37,53 +39,53 @@
        v-model="currentPage"/>
     </div>
 
-		<!-- Modal for edit data {{{ -->
+    <!-- Modal for edit data {{{ -->
     <b-modal ref="modal1" title="edit data" @ok="update(cur_item)">
       <form v-on:submit.prevent="update">
         <b-form-input type="text" placeholder="enter data" v-model="cur_item.data"></b-form-input>
         <small class="text-muted">change some data</small>
 
-				<b-form-select v-model="cur_item.type" :options="type_geos" class="col-10"></b-form-select>
-				<small vertical class="text-muted">change type data</small>
+        <b-form-select v-model="cur_item.type" :options="type_geos" class="col-10"></b-form-select>
+        <small vertical class="text-muted">change type data</small>
 
         <b-button-group class="row">
-				<div class="col">
+        <div class="col">
         <b-form-input type="number" step="0.01" placeholder="enter latitude"
-					v-model="cur_item.latitude"></b-form-input>
+          v-model="cur_item.latitude"></b-form-input>
         <small class="text-muted">change lat position</small>
-				</div>
-				<div class="col">
+        </div>
+        <div class="col">
         <b-form-input type="number" step="0.01" placeholder="enter longitude" v-model="cur_item.longitude"></b-form-input>
         <small class="text-muted">change long position</small>
-				</div>
+        </div>
         </b-button-group>
       </form>
     </b-modal>
-		<!-- }}} -->
+    <!-- }}} -->
 
-		<!-- Modal for add data {{{ -->
+    <!-- Modal for add data {{{ -->
     <b-modal ref="modal2" title="edit data" @ok="add(cur_item)">
       <form v-on:submit.prevent="add">
         <b-form-input type="text" placeholder="enter data" v-model="cur_item.data"></b-form-input>
         <small class="text-muted">change some data</small>
 
-				<b-form-select v-model="cur_item.type" :options="type_geos" class="col-10"></b-form-select>
-				<small vertical class="text-muted">change type data</small>
+        <b-form-select v-model="cur_item.type" :options="type_geos" class="col-10"></b-form-select>
+        <small vertical class="text-muted">change type data</small>
 
         <b-button-group class="row">
-				<div class="col">
+        <div class="col">
         <b-form-input type="number" step="0.01" placeholder="enter latitude"
-					v-model="cur_item.latitude"></b-form-input>
+          v-model="cur_item.latitude"></b-form-input>
         <small class="text-muted">change lat position</small>
-				</div>
-				<div class="col">
+        </div>
+        <div class="col">
         <b-form-input type="number" step="0.01" placeholder="enter longitude" v-model="cur_item.longitude"></b-form-input>
         <small class="text-muted">change long position</small>
-				</div>
+        </div>
         </b-button-group>
       </form>
     </b-modal>
-		<!-- }}} -->
+    <!-- }}} -->
 
   </div>
 </template>
@@ -100,8 +102,8 @@
         docs: {
           component: 'bTable'
         },
-				selected: null,
-				type_geos: [],
+        selected: null,
+        type_geos: [],
         cur_item: {id:'dfdfdf', data:'dfdfdf', location:{type: '', coordinates:[0.0,0.0]}},
         items: [{id:'dfdfdf', data:'dfdfdf', location:{type:'point', coordinates:[1,2]}}],
         fields: {
@@ -121,39 +123,39 @@
       ]),
     }, // }}}
     mounted: function() { // {{{
-			console.log(geos.GEO_OBJECT);
-			this.type_geos = geos.GEO_OBJECT;
+      console.log(geos.GEO_OBJECT);
+      this.type_geos = geos.GEO_OBJECT;
       this.GET_DATA().then(()=>{
         //this.items = this.DATA;
         //console.log('good');
       })
     }, // }}}
-		methods: {
-			...mapActions([ // {{{
+    methods: {
+      ...mapActions([ // {{{
         acts.GET_DATA,
         acts.PST_DATA,
         acts.PUT_DATA,
         acts.DEL_DATA,
-			]), // }}}
-			open_edit(item) { // {{{
-				//this.selected = 
+      ]), // }}}
+      open_edit(item) { // {{{
+        //this.selected = 
         this.cur_item = {
           id: item.id,
           data: item.data, type: item.location.type,
           latitude: item.location.coordinates[0],
           longitude: item.location.coordinates[1],
         };
-				this.$refs.modal1.show();
-			}, // }}}
-			open_add(item) { // {{{
+        this.$refs.modal1.show();
+      }, // }}}
+      open_add(item) { // {{{
         this.cur_item = {
           id: '',
           data: '', type: '',
           latitude: 0.0,
           longitude: 0.0,
         };
-				this.$refs.modal2.show();
-			}, // }}}
+        this.$refs.modal2.show();
+      }, // }}}
       del(item) { // {{{
         this.DEL_DATA(item)
           .then((e)=>{
@@ -161,50 +163,50 @@
           })
           .catch(e => {
             console.log(e);
-						this.err_blink(this.$refs[item.id]);
+            this.err_blink(this.$refs[item.id]);
           })
       }, // }}}
-			update(cur_item){ // {{{
-				const item = {
-					id: cur_item.id, data: cur_item.data,
-					location:{ type: cur_item.type,
-						coordinates:[ parseFloat(cur_item.latitude), parseFloat(cur_item.longitude) ]
-					}
-				};
-				this.PUT_DATA(item)
-					.then((e)=>{
-						console.log('putted');
-					})
-					.catch(e => {
-						console.log(e);
-						this.err_blink(this.$refs[item.id]);
-					})
-			}, // }}}
-			add(cur_item){ // {{{
+      update(cur_item){ // {{{
         const item = {
-					id: cur_item.id, data: cur_item.data,
-					location:{
-						type: cur_item.type,
-						coordinates:[parseFloat(cur_item.latitude), parseFloat(cur_item.longitude)],
-					}
-				};
-				console.log(JSON.stringify(item));
-				console.log(this.$refs);
+          id: cur_item.id, data: cur_item.data,
+          location:{ type: cur_item.type,
+            coordinates:[ parseFloat(cur_item.latitude), parseFloat(cur_item.longitude) ]
+          }
+        };
+        this.PUT_DATA(item)
+          .then((e)=>{
+            console.log('putted');
+          })
+          .catch(e => {
+            console.log(e);
+            this.err_blink(this.$refs[item.id]);
+          })
+      }, // }}}
+      add(cur_item){ // {{{
+        const item = {
+          id: cur_item.id, data: cur_item.data,
+          location:{
+            type: cur_item.type,
+            coordinates:[parseFloat(cur_item.latitude), parseFloat(cur_item.longitude)],
+          }
+        };
+        console.log(JSON.stringify(item));
+        console.log(this.$refs);
         this.PST_DATA(item)
           .then((e)=>{
             console.log('posted');
           })
           .catch(e => {
             console.log(e);
-						this.err_blink(this.$refs.addData);
+            this.err_blink(this.$refs.addData);
           })
-			}, // }}}
-			err_blink(e){ // {{{
+      }, // }}}
+      err_blink(e){ // {{{
         e.$el.className = e.$el.className+' show-blinking';
         setTimeout(()=>{
           e.$el.className = e.classObject.join(' ');
         }, 1000);
-			} // }}}
+      } // }}}
     }
   }
   </script>
