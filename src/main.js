@@ -4,32 +4,32 @@ import BootstrapVue from 'bootstrap-vue'
 import 'bootstrap/dist/css/bootstrap.css'
 import 'bootstrap-vue/dist/bootstrap-vue.css'
 
+import VueD3 from 'vue-d3'
+
 import App from './components/app.vue'
 
 import store from './store.js'
-import PanelDebug from './components/panel.debug.vue'
+import PanelDebug from './components/panel-debug.vue'
 
-import PanelData from './components/panel.data.vue'
+import PanelData from './components/panel-data.vue'
 import PageDataTable from './components/page-data-table.vue'
-import PageDataMap from './components/page.data.map.vue'
+import PageDataMap from './components/page-data-map.vue'
 
-// require('../node_modules/bootstrap-vue/dist/bootstrap-vue.css')
-
-Vue.use(VueRouter)
-Vue.use(BootstrapVue)
+Vue.use(VueRouter);
+Vue.use(BootstrapVue);
+Vue.use(VueD3);
 
 const router = new VueRouter({
   mode: 'history',
   base: __dirname,
   routes: [
-    {path: '/', component: PanelDebug, children: [
-      {path: 'datamap', component: PageDataMap, children: [
-        {path: ':id', component: PanelData }
-      ]},
+    {path: '/', component: PanelDebug },
+    {path: '/datamap', component: PageDataMap, children: [
+      {path: ':id', component: PanelData }
     ]},
     {path: '/datatable', component: PageDataTable},
   ]
-})
+});
 
 new Vue({
   el: '#app',
