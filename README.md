@@ -1,5 +1,5 @@
 # gin-vue
-simple example of RESTful data exchange whith go(gin) vue(vuex, vue-resource, d3-vue)
+simple example of data exchange whith go(gin) vue(vuex, vue-resource, d3-vue)
 
 #### start
   * `npm install`
